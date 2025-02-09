@@ -20,7 +20,6 @@ export async function GET({ params }: { params: { id: string } }) {
 
     return NextResponse.json({ anime }, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'anime:", error);
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
@@ -64,11 +63,10 @@ export async function PUT({
     );
 
     return NextResponse.json(
-      { message: "Anime mis à jour avec succès", anime: updatedAnime },
+      { message: `${updatedAnime}`},
       { status: 200 }
     );
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de l'anime:", error);
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
@@ -90,11 +88,10 @@ export async function DELETE({ params }: { params: { id: string } }) {
     const deletedAnime = await deleteAnime(id);
 
     return NextResponse.json(
-      { message: "Anime supprimé avec succès", anime: deletedAnime },
+      { message: deletedAnime },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'anime:", error);
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }

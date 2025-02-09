@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    await createAnime(
+    const anime = await createAnime(
       userId,
       title,
       saison,
@@ -29,12 +29,8 @@ export async function POST(req: Request) {
       status
     );
 
-    return NextResponse.json(
-      { message: "Anime créé avec succès" },
-      { status: 201 }
-    );
+    return NextResponse.json({ message: anime }, { status: 201 });
   } catch (error) {
-    console.error("Erreur lors de la création de l'anime:", error);
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
@@ -42,25 +38,24 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request){
-    try {
-        const { userId } = await req.json();
-    
-        if (!userId) {
-        return NextResponse.json(
-            { error: "ID de l'utilisateur requis" },
-            { status: 400 }
-        );
-        }
-    
-        const animes = await getAllAnimesByUser(userId);
-    
-        return NextResponse.json({ animes }, { status: 200 });
-    } catch (error) {
-        console.error("Erreur lors de la récupération des animes:", error);
-        return NextResponse.json(
-        { error: "Erreur interne du serveur" },
-        { status: 500 }
-        );
+export async function GET(req: Request) {
+  try {
+    const { userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "ID de l'utilisateur requis" },
+        { status: 400 }
+      );
     }
+
+    const animes = await getAllAnimesByUser(userId);
+
+    return NextResponse.json({ animes }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erreur interne du serveur" },
+      { status: 500 }
+    );
+  }
 }

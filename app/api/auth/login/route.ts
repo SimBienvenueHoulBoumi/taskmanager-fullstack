@@ -1,11 +1,12 @@
+
 import { NextResponse } from "next/server";
 import { loginUser } from "@/app/services/userServices";
 
 export async function POST(req: Request) {
   try {
-    const { username, email, password } = await req.json();
+    const { email, password } = await req.json();
 
-    if (!username || !password || !email) {
+    if (!password || !email) {
       return NextResponse.json(
         { error: "Tous les champs sont requis" },
         { status: 400 }

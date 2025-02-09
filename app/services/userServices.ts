@@ -1,51 +1,79 @@
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const SECRET_KEY = process.env.JWT_SECRET || "secret";
 
 /**
- * Inscription d'un utilisateur
+ * Inscription d'un utilisateur avec retour d'un token JWT
  */
 export async function registerUser(
   username: string,
   email: string,
   password: string
 ) {
-  // Vérification de l'email unique
-  const existingUser = await prisma.user.findFirst({
-    where: { email, username },
-  });
+  try {
+    if (await isUserExist(email, username)) {
+      throw new Error("Cet email ou ce nom d'utilisateur est déjà utilisé");
+    }
 
-  if (existingUser) {
-    throw new Error("Cet email est déjà utilisé");
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: { username, password: hashedPassword, email },
+    });
+
+    // Génération du token
+    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
+      expiresIn: "24h",
+    });
+
+    return { message: "Utilisateur créé avec succès", token };
+  } catch (error) {
+    throw new Error("Erreur interne du serveur");
   }
-
-  // Hachage du mot de passe
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Création de l'utilisateur
-  prisma.user.create({
-    data: { username, password: hashedPassword, email },
-  });
-
-  return { message: "Utilisateur créé avec succès" };
 }
 
 /**
- * Connexion d'un utilisateur
+ * Connexion d'un utilisateur avec retour d'un token JWT
  */
 export async function loginUser(email: string, password: string) {
-  // Recherche de l'utilisateur par email
-  const user = await prisma.user.findFirst({ where: { email } });
+  try {
+    const user = await prisma.user.findFirst({ where: { email } });
 
-  if (!user) {
-    throw new Error("Utilisateur non trouvé");
+    if (!user) {
+      throw new Error("Utilisateur non trouvé");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      throw new Error("Mot de passe incorrect");
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    return { message: "Connexion réussie", token };
+  } catch (error) {
+    throw new Error("Erreur interne du serveur");
   }
+}
 
-  // Vérification du mot de passe
-  const passwordMatch = await bcrypt.compare(password, user.password);
+/**
+ * Vérifier l'existence d'un utilisateur par email ou nom d'utilisateur
+ */
+export async function isUserExist(email: string, username: string) {
+  try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+    });
 
-  if (!passwordMatch) {
-    throw new Error("Mot de passe incorrect");
+    return existingUser !== null;
+  } catch (error) {
+    throw new Error("Erreur interne du serveur");
   }
-
-  return { message: "Connexion réussie" };
 }

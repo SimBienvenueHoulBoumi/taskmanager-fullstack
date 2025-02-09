@@ -20,9 +20,9 @@ export async function createAnime(
         status,
       },
     });
-    return newAnime;
+    return `${newAnime.title} created successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la création de l'anime");
+    throw new Error("Erreur lors de la création de l'anime").message;
   }
 }
 
@@ -32,17 +32,17 @@ export async function getAnimeById(id: number) {
     const anime = await prisma.anime.findUnique({
       where: { id },
       include: {
-        user: true, // Inclure les informations de l'utilisateur associé
+        user: true,
       },
     });
 
     if (!anime) {
-      throw new Error("Anime non trouvé");
+      throw new Error("Anime non trouvé").message;
     }
 
     return anime;
   } catch (error) {
-    throw new Error("Erreur lors de la récupération de l'anime");
+    throw new Error("Erreur lors de la récupération de l'anime").message;
   }
 }
 
@@ -54,7 +54,7 @@ export async function getAllAnimesByUser(userId: number) {
     });
     return animes;
   } catch (error) {
-    throw new Error("Erreur lors de la récupération des animes");
+    throw new Error("Erreur lors de la récupération des animes").message;
   }
 }
 
@@ -68,7 +68,7 @@ export async function updateAnime(
   status: boolean
 ) {
   try {
-    const updatedAnime = await prisma.anime.update({
+    const updated = await prisma.anime.update({
       where: { id },
       data: {
         title,
@@ -79,9 +79,9 @@ export async function updateAnime(
       },
     });
 
-    return updatedAnime;
+    return `${updated.title} updated successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la mise à jour de l'anime");
+    throw new Error("Erreur lors de la mise à jour de l'anime").message;
   }
 }
 
@@ -92,8 +92,8 @@ export async function deleteAnime(id: number) {
       where: { id },
     });
 
-    return deletedAnime;
+    return `${deletedAnime.title} updated successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la suppression de l'anime");
+    throw new Error("Erreur lors de la suppression de l'anime").message;
   }
 }
