@@ -1,12 +1,11 @@
-"use client";
+"use client"
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import Cookies from "@/node_modules/@types/js-cookie";
+import Cookies from "js-cookie";
 
 export default function App() {
-  
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -50,7 +49,8 @@ export default function App() {
 
       const data = await response.json();
 
-      Cookies.set("token", data.token, { expires: 24, secure: true });
+      // Utilise js-cookie pour définir le cookie côté client
+      Cookies.set("token", data.token, { expires: 1, secure: true });
 
       toast.success(data.message);
     } catch (err) {
