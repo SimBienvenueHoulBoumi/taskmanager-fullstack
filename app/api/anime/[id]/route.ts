@@ -16,18 +16,15 @@ import { NextRequest } from "next/server";
  * Si l'ID est invalide ou manquant, une erreur est renvoyée.
  * En cas de succès, l'anime trouvé est retourné dans la réponse.
  *
- * @param {Object} param0 - Contient les paramètres et la requête HTTP.
- * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
- * @param {NextRequest} param0.request - La requête HTTP.
+ * @param {NextRequest} request - La requête HTTP.
+ * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant l'anime ou une erreur.
  */
-export async function GET({
-  params,
-  request,
-}: {
-  params: { id: string };
-  request: NextRequest;
-}) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
@@ -70,18 +67,15 @@ export async function GET({
  * Si l'ID ou certains champs sont manquants, une erreur est renvoyée.
  * En cas de succès, un message de confirmation est retourné.
  *
- * @param {Object} param0 - Contient les paramètres et la requête HTTP.
- * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
- * @param {NextRequest} param0.request - La requête HTTP contenant les nouvelles données de l'anime.
+ * @param {NextRequest} request - La requête HTTP contenant les nouvelles données de l'anime.
+ * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de succès ou une erreur.
  */
-export async function PUT({
-  params,
-  request,
-}: {
-  params: { id: string };
-  request: NextRequest;
-}) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
@@ -141,18 +135,15 @@ export async function PUT({
  * Si l'ID est invalide ou manquant, une erreur est renvoyée.
  * En cas de succès, un message de confirmation est retourné.
  *
- * @param {Object} param0 - Contient les paramètres et la requête HTTP.
- * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
- * @param {NextRequest} param0.request - La requête HTTP.
+ * @param {NextRequest} request - La requête HTTP.
+ * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de confirmation ou une erreur.
  */
-export async function DELETE({
-  params,
-  request,
-}: {
-  params: { id: string };
-  request: NextRequest;
-}) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
