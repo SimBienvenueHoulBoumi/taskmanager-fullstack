@@ -22,7 +22,11 @@ export async function createAnime(
     });
     return `${newAnime.title} created successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la création de l'anime").message;
+    throw new Error(
+      `Erreur lors de la création de l'anime : ${
+        error instanceof Error ? error.message : "Inconnu"
+      }`
+    );
   }
 }
 
@@ -37,12 +41,16 @@ export async function getAnimeById(id: number) {
     });
 
     if (!anime) {
-      throw new Error("Anime non trouvé").message;
+      throw new Error(`Anime non trouvé`);
     }
 
     return anime;
   } catch (error) {
-    throw new Error("Erreur lors de la récupération de l'anime").message;
+    throw new Error(
+      `Erreur lors de la recuperation de l'anime : ${
+        error instanceof Error ? error.message : "Inconnu"
+      }`
+    );
   }
 }
 
@@ -54,7 +62,11 @@ export async function getAllAnimesByUser(userId: number) {
     });
     return animes;
   } catch (error) {
-    throw new Error("Erreur lors de la récupération des animes").message;
+    throw new Error(
+      `Erreur lors de la recuperation de l'anime : ${
+        error instanceof Error ? error.message : "Inconnu"
+      }`
+    );
   }
 }
 
@@ -81,7 +93,11 @@ export async function updateAnime(
 
     return `${updated.title} updated successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la mise à jour de l'anime").message;
+    throw new Error(
+      `Erreur lors de la mise a jour de l'anime : ${
+        error instanceof Error ? error.message : "Inconnu"
+      }`
+    );
   }
 }
 
@@ -94,6 +110,10 @@ export async function deleteAnime(id: number) {
 
     return `${deletedAnime.title} updated successfully`;
   } catch (error) {
-    throw new Error("Erreur lors de la suppression de l'anime").message;
+    throw new Error(
+      `Erreur lors de la suppression de l'anime : ${
+        error instanceof Error ? error.message : "Inconnu"
+      }`
+    );
   }
 }

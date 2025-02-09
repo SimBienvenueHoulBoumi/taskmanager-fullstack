@@ -74,7 +74,7 @@ export async function loginUser(email: string, password: string) {
     if (error instanceof Error) {
       return { error: error.message };
     }
-    throw new Error("Erreur interne du serveur");
+    throw new Error(`erreur interne : ${error instanceof Error ? error.message : 'Inconnu'}`);
   }
 }
 
@@ -91,7 +91,7 @@ export async function isUserExist(email: string, username: string) {
 
     return existingUser !== null;
   } catch (error) {
-    throw new Error("Erreur interne du serveur");
+    throw new Error(`erreur interne : ${error instanceof Error ? error.message : 'Inconnu'}`);
   }
 }
 
@@ -125,11 +125,11 @@ export async function verifyToken(token: string) {
         throw new Error("Token expiré");
       }
       if (error.message.includes("malformé")) {
-        throw new Error("Token malformé");
+        throw new Error(`Token malformé : ${error instanceof Error ? error.message : 'Inconnu'}`);
       }
     }
 
     // Erreur de décodage générale
-    throw new Error("Token invalide");
+    throw new Error(`Token invalide : ${error instanceof Error ? error.message : 'Inconnu'}`);
   }
 }
