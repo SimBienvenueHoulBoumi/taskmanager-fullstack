@@ -1,8 +1,20 @@
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 
-const SECRET_KEY = process.env.JWT_SECRET || "secret";
+const SECRET_KEY = new TextEncoder().encode(
+  process.env.JWT_SECRET || "secret_key"
+);
+
+/**
+ * Générer un token JWT avec `jose`
+ */
+async function generateToken(userId: string, email: string) {
+  return await new SignJWT({ id: userId, email })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(SECRET_KEY);
+}
 
 /**
  * Inscription d'un utilisateur avec retour d'un token JWT
@@ -23,13 +35,15 @@ export async function registerUser(
       data: { username, password: hashedPassword, email },
     });
 
-    // Génération du token
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
-      expiresIn: "24h",
-    });
+    // Génération du token avec `jose`
+    const token = await generateToken(user.id.toString(), user.email);
 
     return { message: "Utilisateur créé avec succès", token };
   } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
     throw new Error("Erreur interne du serveur");
   }
 }
@@ -51,12 +65,15 @@ export async function loginUser(email: string, password: string) {
       throw new Error("Mot de passe incorrect");
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    // Génération du token avec `jose`
+    const token = await generateToken(user.id.toString(), user.email);
 
     return { message: "Connexion réussie", token };
   } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
     throw new Error("Erreur interne du serveur");
   }
 }
@@ -75,5 +92,44 @@ export async function isUserExist(email: string, username: string) {
     return existingUser !== null;
   } catch (error) {
     throw new Error("Erreur interne du serveur");
+  }
+}
+
+/**
+ * Vérifier un token JWT
+ */
+export async function verifyToken(token: string) {
+  try {
+    // Décodage et vérification du token
+    const { payload } = await jwtVerify(token, SECRET_KEY, {
+      algorithms: ["HS256"],
+    });
+
+    // Vérification de la validité du token (expiration)
+    const currentTime = Math.floor(Date.now() / 1000); // Temps actuel en secondes
+    if (payload.exp && payload.exp < currentTime) {
+      throw new Error("Token expiré");
+    }
+
+    // Vérification de la présence de l'ID utilisateur dans le payload
+    if (!payload.id) {
+      throw new Error("Token malformé : ID utilisateur absent");
+    }
+
+    // Retourne l'ID utilisateur extrait du token
+    return Number(payload.id);
+  } catch (error) {
+    // Gestion des erreurs détaillées
+    if (error instanceof Error) {
+      if (error.message === "Token expired") {
+        throw new Error("Token expiré");
+      }
+      if (error.message.includes("malformé")) {
+        throw new Error("Token malformé");
+      }
+    }
+
+    // Erreur de décodage générale
+    throw new Error("Token invalide");
   }
 }

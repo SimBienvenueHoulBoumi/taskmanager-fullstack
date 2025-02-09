@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
+import Cookies from "@/node_modules/@types/js-cookie";
 
 export default function App() {
+  
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -35,7 +36,7 @@ export default function App() {
 
     if (!isLogin && formData.password !== formData.password2) {
       setError("Les mots de passe ne correspondent pas.");
-      toast.error(error);
+      toast.warn(error);
       return;
     }
 
@@ -47,11 +48,7 @@ export default function App() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json(); // Attendre la réponse JSON
-
-      if (!response.ok) {
-        throw new Error(data.error || "Une erreur est survenue");
-      }
+      const data = await response.json();
 
       Cookies.set("token", data.token, { expires: 24, secure: true });
 
@@ -63,6 +60,10 @@ export default function App() {
       }
     }
   };
+
+  useEffect(() => {
+    setFormData({ username: "", email: "", password: "", password2: "" });
+  }, [isLogin]);
 
   return (
     <div className="flex items-center justify-center min-h-screen p-6">
