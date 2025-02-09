@@ -16,7 +16,7 @@ import { NextRequest } from "next/server";
  * Si l'ID est invalide ou manquant, une erreur est renvoyée.
  * En cas de succès, l'anime trouvé est retourné dans la réponse.
  *
- * @param {Object} param0 - Contient les paramètres et la requête de la requête HTTP.
+ * @param {Object} param0 - Contient les paramètres et la requête HTTP.
  * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @param {NextRequest} param0.request - La requête HTTP.
  * @returns {NextResponse} - La réponse contenant l'anime ou une erreur.
@@ -40,7 +40,7 @@ export async function GET({
     }
 
     // Vérification du token
-    const payload = await verifyToken(token);
+    await verifyToken(token);  // Si le token est invalide, cela lèvera une erreur
     const id = parseInt(params.id);
 
     if (!id) {
@@ -53,7 +53,7 @@ export async function GET({
     const anime = await getAnimeById(id);
 
     return NextResponse.json({ anime }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
@@ -70,7 +70,7 @@ export async function GET({
  * Si l'ID ou certains champs sont manquants, une erreur est renvoyée.
  * En cas de succès, un message de confirmation est retourné.
  *
- * @param {Object} param0 - Contient les paramètres et la requête de la requête HTTP.
+ * @param {Object} param0 - Contient les paramètres et la requête HTTP.
  * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @param {NextRequest} param0.request - La requête HTTP contenant les nouvelles données de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de succès ou une erreur.
@@ -80,7 +80,7 @@ export async function PUT({
   request,
 }: {
   params: { id: string };
-  request: NextRequest; // Utiliser NextRequest
+  request: NextRequest;
 }) {
   try {
     // Récupérer le token depuis les cookies
@@ -94,12 +94,11 @@ export async function PUT({
     }
 
     // Vérification du token
-    const payload = await verifyToken(token);
+    await verifyToken(token);  // Vérification du token sans affecter de variable inutilisée
     const id = parseInt(params.id);
     const { title, saison, episodeWatched, episodeTotal, status } =
       await request.json();
 
-    // Vérification de la présence de tous les champs nécessaires
     if (
       !id ||
       !title ||
@@ -124,9 +123,8 @@ export async function PUT({
       status
     );
 
-    // Retourner un message de confirmation
     return NextResponse.json({ message: `${updatedAnime}` }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
@@ -143,7 +141,7 @@ export async function PUT({
  * Si l'ID est invalide ou manquant, une erreur est renvoyée.
  * En cas de succès, un message de confirmation est retourné.
  *
- * @param {Object} param0 - Contient les paramètres et la requête de la requête HTTP.
+ * @param {Object} param0 - Contient les paramètres et la requête HTTP.
  * @param {Object} param0.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @param {NextRequest} param0.request - La requête HTTP.
  * @returns {NextResponse} - La réponse contenant un message de confirmation ou une erreur.
@@ -167,7 +165,7 @@ export async function DELETE({
     }
 
     // Vérification du token
-    const payload = await verifyToken(token);
+    await verifyToken(token);  // Vérification sans utiliser la variable `payload`
     const id = parseInt(params.id);
 
     if (!id) {
@@ -180,9 +178,8 @@ export async function DELETE({
     // Supprimer l'anime de la base de données
     const deletedAnime = await deleteAnime(id);
 
-    // Retourner un message de confirmation
     return NextResponse.json({ message: deletedAnime }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
       { status: 500 }
