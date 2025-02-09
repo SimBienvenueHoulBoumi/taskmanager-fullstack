@@ -21,9 +21,8 @@ import { NextRequest } from "next/server";
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant l'anime ou une erreur.
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
-    // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
 
     if (!token) {
@@ -33,11 +32,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    // Vérification du token
-    await verifyToken(token);  // Si le token est invalide, cela lèvera une erreur
-    const id = parseInt(params.id);
+    await verifyToken(token);
 
-    if (!id) {
+    // Extraction de l'ID depuis l'URL
+    const urlParts = request.nextUrl.pathname.split("/");
+    const id = parseInt(urlParts[urlParts.length - 1]); // Récupère le dernier segment
+
+    if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID de l'anime requis" },
         { status: 400 }
@@ -45,7 +46,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     const anime = await getAnimeById(id);
-
     return NextResponse.json({ anime }, { status: 200 });
   } catch {
     return NextResponse.json(
@@ -54,6 +54,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     );
   }
 }
+
 
 /**
  * Fonction pour mettre à jour un anime par son ID.
@@ -69,9 +70,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de succès ou une erreur.
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest) {
   try {
-    // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
 
     if (!token) {
@@ -81,14 +81,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    // Vérification du token
-    await verifyToken(token);  // Vérification du token sans affecter de variable inutilisée
-    const id = parseInt(params.id);
+    await verifyToken(token);
+
+    // Extraction de l'ID depuis l'URL
+    const urlParts = request.nextUrl.pathname.split("/");
+    const id = parseInt(urlParts[urlParts.length - 1]);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de l'anime requis" },
+        { status: 400 }
+      );
+    }
+
     const { title, saison, episodeWatched, episodeTotal, status } =
       await request.json();
 
     if (
-      !id ||
       !title ||
       !saison ||
       episodeWatched === undefined ||
@@ -101,7 +110,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    // Mettre à jour l'anime dans la base de données
     const updatedAnime = await updateAnime(
       id,
       title,
@@ -111,7 +119,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       status
     );
 
-    return NextResponse.json({ message: `${updatedAnime}` }, { status: 200 });
+    return NextResponse.json({ message: updatedAnime }, { status: 200 });
   } catch {
     return NextResponse.json(
       { error: "Erreur interne du serveur" },
@@ -119,6 +127,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     );
   }
 }
+
 
 /**
  * Fonction pour supprimer un anime par son ID.
@@ -134,9 +143,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de confirmation ou une erreur.
  */
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
-    // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
 
     if (!token) {
@@ -146,20 +154,20 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       );
     }
 
-    // Vérification du token
-    await verifyToken(token);  // Vérification sans utiliser la variable `payload`
-    const id = parseInt(params.id);
+    await verifyToken(token);
 
-    if (!id) {
+    // Extraction de l'ID depuis l'URL
+    const urlParts = request.nextUrl.pathname.split("/");
+    const id = parseInt(urlParts[urlParts.length - 1]);
+
+    if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID de l'anime requis" },
         { status: 400 }
       );
     }
 
-    // Supprimer l'anime de la base de données
     const deletedAnime = await deleteAnime(id);
-
     return NextResponse.json({ message: deletedAnime }, { status: 200 });
   } catch {
     return NextResponse.json(
@@ -168,3 +176,4 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     );
   }
 }
+
