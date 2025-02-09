@@ -17,7 +17,7 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ```
-email: brhulla@gmail.com
+email: text@mail.com
 password: user123
-username: bienvenue
+username: xenue
 ```
