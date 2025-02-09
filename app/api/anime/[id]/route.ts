@@ -17,14 +17,11 @@ import { NextRequest } from "next/server";
  * En cas de succès, l'anime trouvé est retourné dans la réponse.
  *
  * @param {NextRequest} request - La requête HTTP.
- * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context - Le contexte contenant les paramètres.
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant l'anime ou une erreur.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
@@ -68,14 +65,11 @@ export async function GET(
  * En cas de succès, un message de confirmation est retourné.
  *
  * @param {NextRequest} request - La requête HTTP contenant les nouvelles données de l'anime.
- * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context - Le contexte contenant les paramètres.
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de succès ou une erreur.
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
@@ -136,14 +130,11 @@ export async function PUT(
  * En cas de succès, un message de confirmation est retourné.
  *
  * @param {NextRequest} request - La requête HTTP.
- * @param {Object} context - Contexte de la requête contenant les paramètres.
+ * @param {Object} context - Le contexte contenant les paramètres.
  * @param {Object} context.params - Les paramètres de la requête contenant l'ID de l'anime.
  * @returns {NextResponse} - La réponse contenant un message de confirmation ou une erreur.
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Récupérer le token depuis les cookies
     const token = request.cookies.get("token")?.value;
