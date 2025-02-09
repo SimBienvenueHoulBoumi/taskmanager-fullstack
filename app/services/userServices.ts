@@ -1,6 +1,8 @@
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
+import { serialize } from "cookie";
 import { SignJWT, jwtVerify } from "jose";
+import { NextResponse } from "next/server";
 
 const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || "secret_key"
@@ -56,17 +58,27 @@ export async function loginUser(email: string, password: string) {
     const user = await prisma.user.findFirst({ where: { email } });
 
     if (!user) {
-      throw new Error("Utilisateur non trouvé");
+      throw new Error("Utilisateur non trouvé").message;
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      throw new Error("Mot de passe incorrect");
+      throw new Error("Mot de passe incorrect").message;
     }
 
     // Génération du token avec `jose`
     const token = await generateToken(user.id.toString(), user.email);
+
+    const cookie = serialize("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    const response = NextResponse.json({ message: "Login successful" });
+    response.headers.append("Set-Cookie", cookie);
 
     return { message: "Connexion réussie", token };
   } catch (error) {
@@ -74,7 +86,9 @@ export async function loginUser(email: string, password: string) {
     if (error instanceof Error) {
       return { error: error.message };
     }
-    throw new Error(`erreur interne : ${error instanceof Error ? error.message : 'Inconnu'}`);
+    throw new Error(
+      `erreur interne : ${error instanceof Error ? error.message : "Inconnu"}`
+    ).message;
   }
 }
 
@@ -91,7 +105,9 @@ export async function isUserExist(email: string, username: string) {
 
     return existingUser !== null;
   } catch (error) {
-    throw new Error(`erreur interne : ${error instanceof Error ? error.message : 'Inconnu'}`);
+    throw new Error(
+      `erreur interne : ${error instanceof Error ? error.message : "Inconnu"}`
+    ).message;
   }
 }
 
@@ -113,7 +129,7 @@ export async function verifyToken(token: string) {
 
     // Vérification de la présence de l'ID utilisateur dans le payload
     if (!payload.id) {
-      throw new Error("Token malformé : ID utilisateur absent");
+      throw new Error("Token malformé : ID utilisateur absent").message;
     }
 
     // Retourne l'ID utilisateur extrait du token
@@ -125,11 +141,17 @@ export async function verifyToken(token: string) {
         throw new Error("Token expiré");
       }
       if (error.message.includes("malformé")) {
-        throw new Error(`Token malformé : ${error instanceof Error ? error.message : 'Inconnu'}`);
+        throw new Error(
+          `Token malformé : ${
+            error instanceof Error ? error.message : "Inconnu"
+          }`
+        );
       }
     }
 
     // Erreur de décodage générale
-    throw new Error(`Token invalide : ${error instanceof Error ? error.message : 'Inconnu'}`);
+    throw new Error(
+      `Token invalide : ${error instanceof Error ? error.message : "Inconnu"}`
+    );
   }
 }

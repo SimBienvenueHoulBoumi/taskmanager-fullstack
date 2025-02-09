@@ -49,7 +49,6 @@ export default function App() {
 
       const data = await response.json();
 
-      // Utilise js-cookie pour définir le cookie côté client
       Cookies.set("token", data.token, { expires: 1, secure: true });
 
       toast.success(data.message);
