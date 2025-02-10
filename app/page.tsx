@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
+import { FaSpinner } from "react-icons/fa";
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +15,8 @@ export default function App() {
     password2: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [disabled, setDisabled] = useState(false); // État pour désactiver le bouton
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,6 +25,8 @@ export default function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
+    setDisabled(true); // Désactive le bouton immédiatement
 
     if (
       !formData.email ||
@@ -29,13 +34,17 @@ export default function App() {
       (!isLogin && !formData.username)
     ) {
       setError("Tous les champs sont requis.");
-      toast.error(error);
+      toast.error("Tous les champs sont requis.");
+      setLoading(false);
+      setDisabled(false);
       return;
     }
 
     if (!isLogin && formData.password !== formData.password2) {
       setError("Les mots de passe ne correspondent pas.");
-      toast.warn(error);
+      toast.warn("Les mots de passe ne correspondent pas.");
+      setLoading(false);
+      setDisabled(false);
       return;
     }
 
@@ -52,11 +61,19 @@ export default function App() {
       Cookies.set("token", data.token, { expires: 1, secure: true });
 
       toast.success(data.message);
+
+      // Attente de 5 secondes avant de réactiver le bouton
+      setTimeout(() => {
+        setDisabled(false);
+      }, 5000);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
         toast.error(err.message);
+        setDisabled(false);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,15 +141,25 @@ export default function App() {
 
           <button
             type="submit"
-            className="bg-blue-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-blue-300 transition"
+            className={`bg-blue-500 text-gray-900 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center ${
+              disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-300"
+            }`}
+            disabled={disabled}
           >
-            {isLogin ? "Login" : "Register"}
+            {loading ? (
+              <FaSpinner className="animate-spin text-white" size={20} />
+            ) : isLogin ? (
+              "Login"
+            ) : (
+              "Register"
+            )}
           </button>
         </motion.form>
 
         <button
           onClick={() => setIsLogin(!isLogin)}
           className="mt-4 text-blue-300 hover:underline"
+          disabled={disabled}
         >
           {isLogin ? "Create account" : "Already have an account?"}
         </button>
