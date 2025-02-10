@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import pour rafraîchir
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { FaSpinner } from "react-icons/fa";
 
 export default function App() {
+  const router = useRouter(); // Hook pour rafraîchir la page
+
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -16,7 +19,7 @@ export default function App() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [disabled, setDisabled] = useState(false); // État pour désactiver le bouton
+  const [disabled, setDisabled] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,7 +29,7 @@ export default function App() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setDisabled(true); // Désactive le bouton immédiatement
+    setDisabled(true);
 
     if (
       !formData.email ||
@@ -58,20 +61,24 @@ export default function App() {
 
       const data = await response.json();
 
-      Cookies.set("token", data.token, { expires: 1, secure: true });
-
-      toast.success(data.message);
-
-      // Attente de 5 secondes avant de réactiver le bouton
-      setTimeout(() => {
-        setDisabled(false);
-      }, 5000);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-        toast.error(err.message);
-        setDisabled(false);
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur lors de l'authentification");
       }
+
+      if (data.token) {
+        Cookies.set("token", data.token, { expires: 1, secure: true });
+        toast.success(data.message);
+        
+        // Rafraîchir la page après un court délai
+        setTimeout(() => {
+          router.refresh(); // Utilisation du router pour rafraîchir Next.js
+        }, 1500);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setDisabled(false); // Réactivation du bouton en cas d'erreur
     } finally {
       setLoading(false);
     }
